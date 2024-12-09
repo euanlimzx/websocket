@@ -27,6 +27,7 @@ function sendMessageToContentScript(message) {
 }
 
 function connect() {
+  sendMessageToContentScript("init");
   webSocket = new WebSocket("wss://chrome-extension-websockets.glitch.me/ws");
 
   webSocket.onopen = () => {
@@ -46,6 +47,7 @@ function connect() {
 }
 
 function disconnect() {
+  sendMessageToContentScript("destruct");
   if (webSocket) {
     webSocket.close();
   }
