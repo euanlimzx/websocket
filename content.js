@@ -1,5 +1,4 @@
 function simulateKeyPress(key) {
-  // Select the canvas element inside the body
   const canvasElement = document.querySelector("body");
 
   if (!canvasElement) {
@@ -17,23 +16,18 @@ function simulateKeyPress(key) {
     // which: 38, // Same as keyCode for compatibility
     //NOTE: I commented out some fields as they don't seem to be doing anything. Let's add them back only if we see value
   });
-
-  // // Dispatch the "keydown" event
   canvasElement.dispatchEvent(keyDownEvent);
 
-  // Create a new keyboard event for the key up (to simulate releasing the key)
+  //TODO @EUAN in an ideal scenario we would have a different ping for key up AND key down (i.e. for different motions)
   const keyUpEvent = new KeyboardEvent("keyup", {
     keyCode: 38, // Same keyCode as keyDown
     bubbles: true, // Allow the event to propagate
   });
-
-  // Dispatch the "keyup" event after a short delay to simulate releasing the key
   setTimeout(() => {
     canvasElement.dispatchEvent(keyUpEvent);
   }, 100); // Adjust delay to match desired timing
 }
 
-// Call the function to simulate the "ArrowUp" key press
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Message received", message);
   simulateKeyPress("ArrowUp");

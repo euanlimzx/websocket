@@ -1,4 +1,4 @@
-const TEN_SECONDS_MS = 1000;
+const TEN_SECONDS_MS = 1000; //We changed this just for testing
 let webSocket = null;
 
 // Make sure the Glitch demo server is running
