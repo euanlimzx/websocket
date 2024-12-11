@@ -40,6 +40,14 @@ function connect() {
   });
 }
 
+function disconnect() {
+  chrome.action.setIcon({ path: "icons/socket-inactive.png" }); // todo @euan remove
+  webSocket.disconnect();
+  webSocket = null;
+  tabId = null;
+  ROOM_CODE = null;
+}
+
 function keepAlive() {
   const keepAliveIntervalId = setInterval(
     () => {
@@ -62,11 +70,7 @@ function keepAlive() {
 // be kept alive as long as messages are being sent.
 chrome.action.onClicked.addListener(async () => {
   if (webSocket) {
-    chrome.action.setIcon({ path: "icons/socket-inactive.png" }); // todo @euan remove
-    webSocket.disconnect();
-    webSocket = null;
-    tabId = null;
-    ROOM_CODE = null;
+    disconnect();
   }
 });
 
@@ -85,5 +89,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     sendResponse({ message: `SUCCESS: Room ${request.message} Joined` });
   } else {
     sendResponse({ message: "ERROR: no tab id detected" });
+  }
+});
+
+chrome.tabs.onRemoved.addListener((closedTabId) => {
+  if (closedTabId == tabId) {
+    disconnect();
   }
 });

@@ -13,7 +13,7 @@ function createBox() {
   const box = document.createElement("div");
   box.id = BOX_NAME;
   box.style.width = "200px";
-  box.style.height = "150px";
+  box.style.height = "100px";
 
   box.style.backgroundColor = "white";
   box.style.border = "1px solid black";
