@@ -2,6 +2,7 @@ import { io } from "https://cdn.jsdelivr.net/npm/socket.io-client@4.7.1/+esm";
 const TEN_SECONDS_MS = 10 * 1000;
 let webSocket = null;
 let tabId = null;
+let ROOM_CODE = null;
 
 function sendMessageToContentScript(message) {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, async (tabs) => {
@@ -13,14 +14,14 @@ function sendMessageToContentScript(message) {
   });
 }
 
-function connect(room) {
+function connect() {
   webSocket = io("ws://localhost:3000", {
     transports: ["websocket"],
   });
 
   webSocket.on("connect", () => {
     chrome.action.setIcon({ path: "icons/socket-active.png" });
-    webSocket.emit("join-room", room);
+    webSocket.emit("join-room", ROOM_CODE);
   });
 
   webSocket.on("connect_error", (error) => {
@@ -65,11 +66,12 @@ chrome.action.onClicked.addListener(async () => {
     webSocket.disconnect();
     webSocket = null;
     tabId = null;
+    ROOM_CODE = null;
   }
 });
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  if (tabId) {
+  if (tabId || ROOM_CODE) {
     sendResponse({
       message: "ERROR: Active session in another tab already exists",
     });
@@ -77,7 +79,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   }
   if (sender.tab) {
     tabId = sender.tab.id;
-    connect(request.message);
+    ROOM_CODE = request.message;
+    connect();
     keepAlive();
     sendResponse({ message: `SUCCESS: Room ${request.message} Joined` });
   } else {
