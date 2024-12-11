@@ -99,9 +99,7 @@ if (
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const keyCode = message.message;
-  simulateKeyPress("keydown", keyCode);
-  setTimeout(() => {
-    simulateKeyPress("keyup", keyCode);
-  }, 100);
+  const { keyCode, keyDir } = message;
+  console.log(keyCode, keyDir);
+  simulateKeyPress(keyDir, keyCode);
 });

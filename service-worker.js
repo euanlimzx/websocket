@@ -4,14 +4,12 @@ let webSocket = null;
 let tabId = null;
 let ROOM_CODE = null;
 
-function sendMessageToContentScript(message) {
-  chrome.tabs.query({ active: true, lastFocusedWindow: true }, async (tabs) => {
-    if (tabs[0]) {
-      await chrome.tabs.sendMessage(tabs[0].id, {
-        message: message,
-      });
-    }
-  });
+async function sendMessageToContentScript(payload) {
+  if (!tabId) {
+    console.log("ERROR: no tabId"); //todo @Euan handle accordingly
+    return;
+  }
+  await chrome.tabs.sendMessage(tabId, payload);
 }
 
 function connect() {
@@ -34,9 +32,9 @@ function connect() {
     console.log("keep-alive!", message);
   });
 
-  webSocket.on("keystroke", (keyCode) => {
-    console.log("keystroke received!", keyCode);
-    sendMessageToContentScript(keyCode);
+  webSocket.on("keystroke", (keyEvent) => {
+    console.log("keystroke received!", keyEvent);
+    sendMessageToContentScript(keyEvent);
   });
 }
 
@@ -53,7 +51,6 @@ function keepAlive() {
     () => {
       if (webSocket) {
         console.log("ping");
-        sendMessageToContentScript("help");
         webSocket.emit("keep-alive", "ping", ROOM_CODE);
       } else {
         clearInterval(keepAliveIntervalId);
