@@ -1,21 +1,7 @@
 import { io } from "https://cdn.jsdelivr.net/npm/socket.io-client@4.7.1/+esm";
 const TEN_SECONDS_MS = 10 * 1000;
-const ROOM_CODE = "TEST";
 let webSocket = null;
-
-// Toggle WebSocket connection on action button click
-// Send a message every 10 seconds, the ServiceWorker will
-// be kept alive as long as messages are being sent.
-chrome.action.onClicked.addListener(async () => {
-  if (webSocket) {
-    chrome.action.setIcon({ path: "icons/socket-inactive.png" }); // todo @euan remove
-    webSocket.disconnect();
-    webSocket = null;
-  } else {
-    connect();
-    keepAlive();
-  }
-});
+let tabId = null;
 
 function sendMessageToContentScript(message) {
   chrome.tabs.query({ active: true, lastFocusedWindow: true }, async (tabs) => {
@@ -27,19 +13,19 @@ function sendMessageToContentScript(message) {
   });
 }
 
-function connect() {
-  sendMessageToContentScript("init");
+function connect(room) {
   webSocket = io("ws://localhost:3000", {
     transports: ["websocket"],
   });
 
   webSocket.on("connect", () => {
     chrome.action.setIcon({ path: "icons/socket-active.png" });
-    webSocket.emit("join-room", ROOM_CODE);
+    webSocket.emit("join-room", room);
   });
 
   webSocket.on("connect_error", (error) => {
     console.error("Connection error:", error);
+    //todo @Euan handle error
   });
 
   webSocket.on("keep-alive", (message) => {
@@ -51,20 +37,7 @@ function connect() {
     console.log("keystroke received!", keyCode);
     sendMessageToContentScript(keyCode);
   });
-
-  // webSocket.onclose = () => {
-  //   chrome.action.setIcon({ path: "icons/socket-inactive.png" });
-  //   console.log("websocket connection closed");
-  //   webSocket = null;
-  // };
 }
-
-// function disconnect() {
-//   sendMessageToContentScript("destruct");
-//   if (webSocket) {
-//     webSocket.close();
-//   }
-// }
 
 function keepAlive() {
   const keepAliveIntervalId = setInterval(
@@ -82,3 +55,32 @@ function keepAlive() {
     TEN_SECONDS_MS
   );
 }
+
+// Toggle WebSocket connection on action button click
+// Send a message every 10 seconds, the ServiceWorker will
+// be kept alive as long as messages are being sent.
+chrome.action.onClicked.addListener(async () => {
+  if (webSocket) {
+    chrome.action.setIcon({ path: "icons/socket-inactive.png" }); // todo @euan remove
+    webSocket.disconnect();
+    webSocket = null;
+    tabId = null;
+  }
+});
+
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (tabId) {
+    sendResponse({
+      message: "ERROR: Active session in another tab already exists",
+    });
+    return;
+  }
+  if (sender.tab) {
+    tabId = sender.tab.id;
+    connect(request.message);
+    keepAlive();
+    sendResponse({ message: `SUCCESS: Room ${request.message} Joined` });
+  } else {
+    sendResponse({ message: "ERROR: no tab id detected" });
+  }
+});

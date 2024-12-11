@@ -1,31 +1,67 @@
 const BOX_NAME = "arbitrary-box";
-const createBox = () => {
+// Function to update the content of the box
+function updateBoxContent(content) {
+  // Clear any existing content in the box and set the new content
+  const box = document.getElementById(BOX_NAME);
+  box.innerHTML = "";
+  const newContent = document.createElement("div");
+  newContent.innerHTML = content;
+  box.appendChild(newContent);
+}
+function createBox() {
+  // Create the outer container for the box
   const box = document.createElement("div");
-
-  // Apply styles to position the box in the top-right corner
   box.id = BOX_NAME;
+  box.style.width = "200px";
+  box.style.height = "150px";
+
+  box.style.backgroundColor = "white";
+  box.style.border = "1px solid black";
+  box.style.display = "flex";
+  box.style.borderRadius = "1rem";
+  box.style.flexDirection = "column";
+  box.style.alignItems = "center";
+  box.style.justifyContent = "center";
+  box.style.padding = "20px";
+
   box.style.position = "fixed";
   box.style.top = "10px";
   box.style.right = "10px";
-  box.style.padding = "10px";
-  box.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
-  box.style.color = "white";
-  box.style.fontSize = "16px";
-  box.style.borderRadius = "8px";
-  box.style.zIndex = "1000"; // Ensure the box stays above other elements
-  box.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.3)";
-  box.style.maxWidth = "250px";
-  box.style.wordWrap = "break-word";
-  box.style.whiteSpace = "normal";
+  box.style.zIndex = 9999;
 
-  // Set initial text
-  box.textContent = "Hello, I'm your box!";
+  // Create the text input field
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Enter room code";
+  input.style.width = "80%";
+  input.style.padding = "8px";
+  input.style.marginBottom = "10px";
+
+  // Create the submit button
+  const submitButton = document.createElement("button");
+  submitButton.innerText = "Submit";
+  submitButton.style.padding = "8px 16px";
+  submitButton.style.cursor = "pointer";
+
+  // Add the input and submit button to the box
+  box.appendChild(input);
+  box.appendChild(submitButton);
+
+  // Append the box to the body
   document.body.appendChild(box);
-};
 
-function changeBoxText(newText) {
-  const box = document.querySelector(`#${BOX_NAME}`);
-  box.textContent = newText;
+  // Event listener for the submit button
+  submitButton.addEventListener("click", function () {
+    const room = input.value;
+    joinRoom(room);
+  });
+}
+
+async function joinRoom(room) {
+  const response = await sendMsgToBackground({ message: room });
+  console.log(response);
+  //todo @Euan: handle error if cannot join room, or service worker already handle existing session
+  updateBoxContent("<h2 style='color: black'>Joined Room!</h2>");
 }
 
 function removeBox() {
@@ -33,8 +69,13 @@ function removeBox() {
   if (box) {
     box.remove(); // Remove the box from the DOM
   } else {
-    console.error('Box with id "topRightBox" not found');
+    console.error("Box element not found");
   }
+}
+
+async function sendMsgToBackground(obj) {
+  const response = await chrome.runtime.sendMessage(obj);
+  return response;
 }
 
 function simulateKeyPress(keyPressDir, keyCode) {
@@ -51,19 +92,16 @@ function simulateKeyPress(keyPressDir, keyCode) {
   canvasElement.dispatchEvent(keyDownEvent);
 }
 
+if (
+  window.location.href.match("https://files.twoplayergames.org/files/games/*")
+) {
+  createBox();
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("Message received", message);
-  if (message == "init") {
-    console.log("fuck");
-    createBox();
-  } else if (message == "destruct") {
-    removeBox();
-  } else {
-    const keyCode = message.message;
-    console.log("running this");
-    simulateKeyPress("keydown", keyCode);
-    setTimeout(() => {
-      simulateKeyPress("keyup", keyCode);
-    }, 100);
-  }
+  const keyCode = message.message;
+  simulateKeyPress("keydown", keyCode);
+  setTimeout(() => {
+    simulateKeyPress("keyup", keyCode);
+  }, 100);
 });
