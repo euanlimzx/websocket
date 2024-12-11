@@ -1,15 +1,16 @@
-const TEN_SECONDS_MS = 1000; //We changed this just for testing
+import { io } from "https://cdn.jsdelivr.net/npm/socket.io-client@4.7.1/+esm";
+const TEN_SECONDS_MS = 10 * 1000;
+const ROOM_CODE = "TEST";
 let webSocket = null;
-
-// Make sure the Glitch demo server is running
-fetch("https://chrome-extension-websockets.glitch.me/", { mode: "no-cors" });
 
 // Toggle WebSocket connection on action button click
 // Send a message every 10 seconds, the ServiceWorker will
 // be kept alive as long as messages are being sent.
 chrome.action.onClicked.addListener(async () => {
   if (webSocket) {
-    disconnect();
+    chrome.action.setIcon({ path: "icons/socket-inactive.png" }); // todo @euan remove
+    webSocket.disconnect();
+    webSocket = null;
   } else {
     connect();
     keepAlive();
@@ -28,37 +29,50 @@ function sendMessageToContentScript(message) {
 
 function connect() {
   sendMessageToContentScript("init");
-  webSocket = new WebSocket("wss://chrome-extension-websockets.glitch.me/ws");
+  webSocket = io("ws://localhost:3000", {
+    transports: ["websocket"],
+  });
 
-  webSocket.onopen = () => {
+  webSocket.on("connect", () => {
     chrome.action.setIcon({ path: "icons/socket-active.png" });
-  };
+    webSocket.emit("join-room", ROOM_CODE);
+  });
 
-  webSocket.onmessage = (event) => {
-    console.log(`websocket received message: ${event.data}`);
-    sendMessageToContentScript(event.data);
-  };
+  webSocket.on("connect_error", (error) => {
+    console.error("Connection error:", error);
+  });
 
-  webSocket.onclose = () => {
-    chrome.action.setIcon({ path: "icons/socket-inactive.png" });
-    console.log("websocket connection closed");
-    webSocket = null;
-  };
+  webSocket.on("keep-alive", (message) => {
+    console.log("pong");
+    console.log("keep-alive!", message);
+  });
+
+  webSocket.on("keystroke", (keyCode) => {
+    console.log("keystroke received!", keyCode);
+    sendMessageToContentScript(keyCode);
+  });
+
+  // webSocket.onclose = () => {
+  //   chrome.action.setIcon({ path: "icons/socket-inactive.png" });
+  //   console.log("websocket connection closed");
+  //   webSocket = null;
+  // };
 }
 
-function disconnect() {
-  sendMessageToContentScript("destruct");
-  if (webSocket) {
-    webSocket.close();
-  }
-}
+// function disconnect() {
+//   sendMessageToContentScript("destruct");
+//   if (webSocket) {
+//     webSocket.close();
+//   }
+// }
 
 function keepAlive() {
   const keepAliveIntervalId = setInterval(
     () => {
       if (webSocket) {
         console.log("ping");
-        webSocket.send("ping");
+        sendMessageToContentScript("help");
+        webSocket.emit("keep-alive", "ping", ROOM_CODE);
       } else {
         clearInterval(keepAliveIntervalId);
       }

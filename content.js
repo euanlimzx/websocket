@@ -51,7 +51,7 @@ function simulateKeyPress(keyPressDir, keyCode) {
   canvasElement.dispatchEvent(keyDownEvent);
 }
 
-chrome.runtime.onMessage.addListener(({ message }, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Message received", message);
   if (message == "init") {
     console.log("fuck");
@@ -59,10 +59,11 @@ chrome.runtime.onMessage.addListener(({ message }, sender, sendResponse) => {
   } else if (message == "destruct") {
     removeBox();
   } else {
-    simulateKeyPress("keydown", 38);
+    const keyCode = message.message;
+    console.log("running this");
+    simulateKeyPress("keydown", keyCode);
     setTimeout(() => {
-      simulateKeyPress("keyup", 38);
+      simulateKeyPress("keyup", keyCode);
     }, 100);
-    //TODO @Euan in an ideal world this would be two separate message calls
   }
 });
