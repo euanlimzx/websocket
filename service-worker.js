@@ -81,7 +81,7 @@ chrome.tabs.onRemoved.addListener((currTabId) => {
 });
 
 chrome.tabs.onUpdated.addListener((currTabId, changeInfo) => {
-  if (changeInfo.url && currTabId == tabId) {
+  if (currTabId == tabId) {
     disconnect();
   }
 });
@@ -95,6 +95,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   }
   if (sender.tab) {
     tabId = sender.tab.id;
+    console.log(tabId);
     ROOM_CODE = request.message;
     connect();
     keepAlive();
