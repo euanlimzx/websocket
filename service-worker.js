@@ -13,9 +13,12 @@ async function sendMessageToContentScript(payload) {
 }
 
 function connect() {
-  webSocket = io("ws://localhost:3000", {
+  webSocket = io("wss://socketio-server-do5e.onrender.com/", {
     transports: ["websocket"],
   });
+  // webSocket = io("ws://localhost:3000", {
+  //   transports: ["websocket"],
+  // });
 
   webSocket.on("connect", () => {
     chrome.action.setIcon({ path: "icons/socket-active.png" });
@@ -67,6 +70,18 @@ function keepAlive() {
 // be kept alive as long as messages are being sent.
 chrome.action.onClicked.addListener(async () => {
   if (webSocket) {
+    disconnect();
+  }
+});
+
+chrome.tabs.onRemoved.addListener((currTabId) => {
+  if (currTabId == tabId) {
+    disconnect();
+  }
+});
+
+chrome.tabs.onUpdated.addListener((currTabId, changeInfo) => {
+  if (changeInfo.url && currTabId == tabId) {
     disconnect();
   }
 });
