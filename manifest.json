@@ -16,6 +16,11 @@
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"]
+    },
+    {
+      "matches": ["https://www.twoplayergames.org/*"],
+      "js": ["open-game.js"],
+      "all_frames": true
     }
   ]
 }
