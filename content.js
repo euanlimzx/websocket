@@ -4,9 +4,7 @@ function updateBoxContent(content) {
   // Clear any existing content in the box and set the new content
   const box = document.getElementById(BOX_NAME);
   box.innerHTML = "";
-  const newContent = document.createElement("div");
-  newContent.innerHTML = content;
-  box.appendChild(newContent);
+  box.innerHTML = content;
 }
 function createBox() {
   // Create the outer container for the box
@@ -67,8 +65,8 @@ async function joinRoom(room) {
   console.log(response);
   //todo @Euan: handle error if cannot join room, or service worker already handle existing session
   const content = `
-    <h2 style='color: black'>Joined Room ${room}!</h2>
-    <button id="disconnectBtn" style="margin-top: 10px;">Disconnect</button>
+    <h2 style='color: black; font-family: Helvetica, sans-serif;'>Joined Room ${room}!</h2>
+    <button id="disconnectBtn" style="margin-top: 10px; padding: 8px; font-family: Helvetica, sans-serif;">Disconnect</button>
   `;
   updateBoxContent(content);
   // Add an event listener to the Disconnect button
