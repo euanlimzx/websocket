@@ -80,13 +80,20 @@ chrome.tabs.onRemoved.addListener((currTabId) => {
   }
 });
 
-chrome.tabs.onUpdated.addListener((currTabId, changeInfo) => {
-  if (currTabId == tabId) {
-    disconnect();
-  }
-});
+//todo @Euan temporarily removed this for now because its not purely triggering during refreshes, also triggers during other stuff
+// chrome.tabs.onUpdated.addListener((currTabId, changeInfo) => {
+//   if (currTabId == tabId) {
+//     disconnect();
+//   }
+// });
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  if (request.message == "disconnect") {
+    console.log("user triggered disconnect");
+    disconnect();
+    return;
+  }
+  //todo @Euan very hacky fix ^^
   if (tabId || ROOM_CODE) {
     sendResponse({
       message: "ERROR: Active session in another tab already exists",

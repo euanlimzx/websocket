@@ -12,8 +12,8 @@ function createBox() {
   // Create the outer container for the box
   const box = document.createElement("div");
   box.id = BOX_NAME;
-  box.style.width = "200px";
-  box.style.height = "100px";
+  box.style.width = "300px";
+  box.style.height = "200px";
 
   box.style.backgroundColor = "white";
   box.style.border = "1px solid black";
@@ -56,12 +56,26 @@ function createBox() {
     joinRoom(room);
   });
 }
+function disconnect() {
+  removeBox();
+  createBox();
+  sendMsgToBackground({ message: "disconnect" });
+}
 
 async function joinRoom(room) {
   const response = await sendMsgToBackground({ message: room });
   console.log(response);
   //todo @Euan: handle error if cannot join room, or service worker already handle existing session
-  updateBoxContent("<h2 style='color: black'>Joined Room!</h2>");
+  const content = `
+    <h2 style='color: black'>Joined Room ${room}!</h2>
+    <button id="disconnectBtn" style="margin-top: 10px;">Disconnect</button>
+  `;
+  updateBoxContent(content);
+  // Add an event listener to the Disconnect button
+  //todo @Euan: this is a very hacky fix, eventually we want to fix the UI of this entire thing
+  document
+    .getElementById("disconnectBtn")
+    .addEventListener("click", disconnect);
 }
 
 function removeBox() {
