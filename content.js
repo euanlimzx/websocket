@@ -54,6 +54,7 @@ function createBox() {
     joinRoom(room);
   });
 }
+
 function disconnect() {
   removeBox();
   createBox();

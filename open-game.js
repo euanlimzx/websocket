@@ -29,6 +29,7 @@ function addPlayButton(gameFrameUrl) {
     multiplayerButton.id = "multiplayer-button";
     multiplayerButton.classList.remove("play-button-disabled");
     multiplayerButton.style.backgroundColor = "#8e44e6";
+    multiplayerButton.style.margin = "auto";
 
     // change the child elements
     const buttonTitle = multiplayerButton.querySelector(".title");

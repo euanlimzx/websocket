@@ -4,6 +4,8 @@ let webSocket = null;
 let tabId = null;
 let ROOM_CODE = null;
 
+const MODE = "DEV";
+
 async function sendMessageToContentScript(payload) {
   if (!tabId) {
     console.log("ERROR: no tabId"); //todo @Euan handle accordingly
@@ -13,12 +15,16 @@ async function sendMessageToContentScript(payload) {
 }
 
 function connect() {
-  webSocket = io("wss://socketio-server-do5e.onrender.com/", {
-    transports: ["websocket"],
-  });
-  // webSocket = io("ws://localhost:3000", {
-  //   transports: ["websocket"],
-  // });
+  console.log(chrome.runtime.getManifest());
+
+  webSocket = io(
+    MODE == "DEV"
+      ? "ws://localhost:3000"
+      : "wss://socketio-server-do5e.onrender.com/",
+    {
+      transports: ["websocket"],
+    }
+  );
 
   webSocket.on("connect", () => {
     chrome.action.setIcon({ path: "icons/socket-active.png" });
@@ -100,6 +106,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     });
     return;
   }
+  // need to do something if there is currently no input / room code is invalid
   if (sender.tab) {
     tabId = sender.tab.id;
     console.log(tabId);
