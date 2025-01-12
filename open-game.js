@@ -2,8 +2,9 @@ function getGameFrameUrl() {
   const bodyText = document.querySelector("body").innerHTML;
 
   if (bodyText.indexOf("gameframe") != -1) {
+    // game URLs can be games that are local to twoplayer games, or games that are external
     const gameFrameUrl = new RegExp(
-      "https://files.twoplayergames.org/files/games/.*?/index.html"
+      "https://files.twoplayergames.org/files/games/.*?/index.html|https:\\/\\/html5.gamedistribution.com\\/.*\\/"
     );
 
     return bodyText.match(gameFrameUrl);
@@ -58,6 +59,8 @@ function main() {
   if (!gameFrameUrl) {
     return;
   }
+
+  console.log(gameFrameUrl);
 
   addPlayButton(gameFrameUrl);
 }

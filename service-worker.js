@@ -11,14 +11,19 @@ async function sendMessageToContentScript(payload) {
     console.log("ERROR: no tabId"); //todo @Euan handle accordingly
     return;
   }
+  console.log("payload", payload);
   await chrome.tabs.sendMessage(tabId, payload);
 }
 
 function connect() {
-  console.log(chrome.runtime.getManifest());
+  console.log(
+    MODE === "DEV"
+      ? "ws://localhost:3000"
+      : "wss://socketio-server-do5e.onrender.com/"
+  );
 
   webSocket = io(
-    MODE == "DEV"
+    MODE === "DEV"
       ? "ws://localhost:3000"
       : "wss://socketio-server-do5e.onrender.com/",
     {
