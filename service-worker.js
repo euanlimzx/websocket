@@ -60,7 +60,8 @@ function connect() {
     if (payload.userDisconnected) {
       sendMessageToContentScript({
         status: "ERROR",
-        message: "Other party has disconnected. Please join a new room!",
+        message:
+          "Other party has disconnected. Please refresh & join a new room!",
       });
       disconnect();
     }
