@@ -1,95 +1,32 @@
-const BOX_NAME = "arbitrary-box";
-// Function to update the content of the box
-function updateBoxContent(content) {
-  // Clear any existing content in the box and set the new content
-  const box = document.getElementById(BOX_NAME);
-  box.innerHTML = "";
-  box.innerHTML = content;
-}
-function createBox() {
-  // Create the outer container for the box
-  const box = document.createElement("div");
-  box.id = BOX_NAME;
-  box.style.width = "300px";
-  box.style.height = "200px";
+// CONSTS
+const TOGGLE_BUTTON_ID = "toggle-btn";
+const BOX_ID = "box-id";
+// ----
 
-  box.style.backgroundColor = "white";
-  box.style.border = "1px solid black";
-  box.style.display = "flex";
-  box.style.borderRadius = "1rem";
-  box.style.flexDirection = "column";
-  box.style.alignItems = "center";
-  box.style.justifyContent = "center";
-  box.style.padding = "20px";
-
-  box.style.position = "fixed";
-  box.style.top = "10px";
-  box.style.right = "10px";
-  box.style.zIndex = 9999;
-
-  // Create the text input field
-  const input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = "Enter room code";
-  input.style.width = "80%";
-  input.style.padding = "8px";
-  input.style.marginBottom = "10px";
-
-  // Create the submit button
-  const submitButton = document.createElement("button");
-  submitButton.innerText = "Submit";
-  submitButton.style.padding = "8px 16px";
-  submitButton.style.cursor = "pointer";
-
-  // Add the input and submit button to the box
-  box.appendChild(input);
-  box.appendChild(submitButton);
-
-  // Append the box to the body
-  document.body.appendChild(box);
-
-  // Event listener for the submit button
-  submitButton.addEventListener("click", function () {
-    const room = input.value;
-    joinRoom(room);
-  });
+// MAIN THREAD
+if (
+  window.location.href.match(
+    "https://files.twoplayergames.org/files/games/*"
+  ) ||
+  window.location.href.match("https://html5.gamedistribution.com/.*/$")
+) {
+  header = "Enter room code from duogames.org!";
+  createBox(header, "join-room");
 }
 
-function disconnect() {
-  removeBox();
-  createBox();
-  sendMsgToBackground({ message: "disconnect" });
-}
-
-async function joinRoom(room) {
-  const response = await sendMsgToBackground({ message: room });
-  console.log(response);
-  //todo @Euan: handle error if cannot join room, or service worker already handle existing session
-  const content = `
-    <h2 style='color: black; font-family: Helvetica, sans-serif;'>Joined Room ${room}!</h2>
-    <button id="disconnectBtn" style="margin-top: 10px; padding: 8px; font-family: Helvetica, sans-serif;">Disconnect</button>
-  `;
-  updateBoxContent(content);
-  // Add an event listener to the Disconnect button
-  //todo @Euan: this is a very hacky fix, eventually we want to fix the UI of this entire thing
-  document
-    .getElementById("disconnectBtn")
-    .addEventListener("click", disconnect);
-}
-
-function removeBox() {
-  const box = document.getElementById(BOX_NAME);
-  if (box) {
-    box.remove(); // Remove the box from the DOM
-  } else {
-    console.error("Box element not found");
-  }
-}
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const { keyCode, keyDir } = message;
+  simulateKeyPress(keyDir, keyCode);
+});
 
 async function sendMsgToBackground(obj) {
   const response = await chrome.runtime.sendMessage(obj);
   return response;
 }
+
+// ---------
+
+// KEY PRESS
 
 function simulateKeyPress(keyPressDir, key) {
   const canvasElement = document.querySelector("body");
@@ -111,20 +48,6 @@ function simulateKeyPress(keyPressDir, key) {
   console.log(keyDownEvent);
   canvasElement.dispatchEvent(keyDownEvent);
 }
-
-if (
-  window.location.href.match(
-    "https://files.twoplayergames.org/files/games/*"
-  ) ||
-  window.location.href.match("https://html5.gamedistribution.com/.*/$")
-) {
-  createBox();
-}
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  const { keyCode, keyDir } = message;
-  simulateKeyPress(keyDir, keyCode);
-});
 
 function getKeyCode(keyName) {
   const keyCharToCode = {
@@ -232,3 +155,240 @@ function getKeyCode(keyName) {
 
   return keyCharToCode[keyName];
 }
+
+// --------
+
+// UI
+
+// Function to update the content of the box
+function createBox(headerText, buttonFn) {
+  // Create a container for the entire page (to ensure no default styles interfere)
+  document.body.style.margin = 0;
+  document.body.style.padding = 0;
+  document.body.style.fontFamily = "Arial, sans-serif";
+
+  // Create the toggle button (it will appear above the white box)
+  const toggleButton = document.createElement("button");
+  toggleButton.style.position = "fixed";
+  toggleButton.style.top = "10px";
+  toggleButton.style.right = "20px";
+  toggleButton.style.backgroundColor = "white"; // White background for the button
+  toggleButton.style.color = "black"; // Black color for the icon
+  toggleButton.style.border = "2px solid black"; // Black border for the button
+  toggleButton.style.padding = "0"; // Remove padding to make it a perfect circle
+  toggleButton.style.width = "60px"; // Fixed size for the circle
+  toggleButton.style.height = "60px"; // Fixed size for the circle
+  toggleButton.style.borderRadius = "50%"; // Make the button circular
+  toggleButton.style.cursor = "pointer";
+  toggleButton.style.zIndex = "1000"; // Ensure the button stays above the box
+  toggleButton.style.fontSize = "24px"; // Font size for the arrow
+  toggleButton.style.display = "flex"; // Use flexbox to center the arrow
+  toggleButton.style.alignItems = "center"; // Vertically center the arrow
+  toggleButton.style.justifyContent = "center"; // Horizontally center the arrow
+  toggleButton.innerText = "▲"; // Initial icon (down arrow)
+
+  // Append the button to the body of the document
+  toggleButton.id = TOGGLE_BUTTON_ID;
+  document.body.appendChild(toggleButton);
+
+  // Create the white box (it will be open by default)
+  const whiteBox = document.createElement("div");
+  whiteBox.style.position = "fixed";
+  whiteBox.style.top = "50px"; // Position the white box below the toggle button
+  whiteBox.style.right = "20px";
+  whiteBox.style.width = "300px";
+  whiteBox.style.backgroundColor = "white";
+  whiteBox.style.borderRadius = "10px";
+  whiteBox.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.1)";
+  whiteBox.style.padding = "15px";
+  whiteBox.style.display = "flex"; // The white box is open by default
+  whiteBox.style.flexDirection = "column";
+  whiteBox.style.boxSizing = "border-box";
+
+  // Set text color in the white box to black
+  whiteBox.style.color = "black";
+
+  // Create the header section inside the white box
+  const header = document.createElement("div");
+  header.id = "header";
+  header.innerText = headerText;
+  header.style.fontWeight = "bold";
+  header.style.fontSize = "18px";
+  header.style.marginBottom = "10px";
+
+  if (buttonFn == "join-room") {
+    // Create the body section inside the white box
+    const body = document.createElement("div");
+    body.id = "body";
+    body.style.marginBottom = "10px";
+
+    const inputElement = document.createElement("input");
+    inputElement.type = "text"; // Set the input type
+    inputElement.style.width = "90%"; // Full width to match the card width
+    inputElement.style.padding = "10px"; // Padding for the input field
+    inputElement.style.borderRadius = "5px"; // Rounded borders
+    inputElement.style.border = "1px solid #ccc"; // Light gray border
+    inputElement.style.fontSize = "14px"; // Font size for the input text
+
+    // Append the input element to the body div
+    body.appendChild(inputElement);
+
+    // Create the action section inside the white box
+    const action = document.createElement("div");
+    action.id = "action";
+    const actionButton = document.createElement("button");
+    actionButton.style.backgroundColor = "black"; // Black background
+    actionButton.style.color = "white"; // White text
+    actionButton.style.border = "none"; // No border
+    actionButton.style.fontWeight = "bold";
+    actionButton.style.padding = "10px"; // Padding for the button
+    actionButton.style.borderRadius = "5rem"; // Rounded borders
+    actionButton.style.width = "100%"; // Make the button take the full width of the card
+    actionButton.style.cursor = "pointer"; // Make the button clickable
+    actionButton.style.fontSize = "14px"; // Font size for the button
+    actionButton.innerText = "Join Room"; // Button text
+    actionButton.addEventListener("click", function () {
+      const room = inputElement.value;
+      joinRoom(room);
+    });
+    // Append the button to the action div
+    action.appendChild(actionButton);
+
+    // Append the header, body, and action sections to the white box
+    whiteBox.appendChild(header);
+    whiteBox.appendChild(body);
+    whiteBox.appendChild(action);
+  } else if (buttonFn == "leave-room") {
+    // Create the body section inside the white box
+    const body = document.createElement("div");
+    body.id = "body";
+    body.innerText = "Previous sessions, if any, will be disconnected.";
+    body.style.fontSize = "14px";
+    body.style.marginBottom = "10px";
+
+    // Create the action section inside the white box
+    const action = document.createElement("div");
+    action.id = "action";
+    const actionButton = document.createElement("button");
+    actionButton.style.backgroundColor = "black"; // Black background
+    actionButton.style.color = "white"; // White text
+    actionButton.style.border = "none"; // No border
+    actionButton.style.fontWeight = "bold";
+    actionButton.style.padding = "10px"; // Padding for the button
+    actionButton.style.borderRadius = "5rem"; // Rounded borders
+    actionButton.style.width = "100%"; // Make the button take the full width of the card
+    actionButton.style.cursor = "pointer"; // Make the button clickable
+    actionButton.style.fontSize = "14px"; // Font size for the button
+    actionButton.innerText = "Disconnect"; // Button text
+    actionButton.addEventListener("click", function () {
+      disconnect();
+    });
+    // Append the button to the action div
+    action.appendChild(actionButton);
+
+    // Append the header, body, and action sections to the white box
+    whiteBox.appendChild(header);
+    whiteBox.appendChild(body);
+    whiteBox.appendChild(action);
+  } else {
+  }
+  // Append the white box to the body of the document
+  whiteBox.id = BOX_ID;
+  document.body.appendChild(whiteBox);
+
+  // Function to toggle the visibility of the white box and the icon
+  toggleButton.addEventListener("click", () => {
+    if (whiteBox.style.display === "none") {
+      whiteBox.style.display = "flex"; // Show the box
+      toggleButton.innerText = "▲"; // Down arrow when box is open
+    } else {
+      whiteBox.style.display = "none"; // Hide the box
+      toggleButton.innerText = "▼"; // Up arrow when box is closed
+    }
+  });
+}
+function updateBoxContent(content) {
+  // Clear any existing content in the box and set the new content
+  const box = document.getElementById(BOX_NAME);
+  box.innerHTML = "";
+  box.innerHTML = content;
+}
+function oldCreateBox() {
+  // Create the outer container for the box
+  const box = document.createElement("div");
+  box.id = BOX_NAME;
+  box.style.width = "300px";
+  box.style.height = "200px";
+
+  box.style.backgroundColor = "white";
+  box.style.border = "1px solid black";
+  box.style.display = "flex";
+  box.style.borderRadius = "1rem";
+  box.style.flexDirection = "column";
+  box.style.alignItems = "center";
+  box.style.justifyContent = "center";
+  box.style.padding = "20px";
+
+  box.style.position = "fixed";
+  box.style.top = "10px";
+  box.style.right = "10px";
+  box.style.zIndex = 9999;
+
+  // Create the text input field
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Enter room code";
+  input.style.width = "80%";
+  input.style.padding = "8px";
+  input.style.marginBottom = "10px";
+
+  // Create the submit button
+  const submitButton = document.createElement("button");
+  submitButton.innerText = "Submit";
+  submitButton.style.padding = "8px 16px";
+  submitButton.style.cursor = "pointer";
+
+  // Add the input and submit button to the box
+  box.appendChild(input);
+  box.appendChild(submitButton);
+
+  // Append the box to the body
+  document.body.appendChild(box);
+
+  // Event listener for the submit button
+  submitButton.addEventListener("click", function () {
+    const room = input.value;
+    joinRoom(room);
+  });
+}
+
+function removeBox() {
+  const box = document.getElementById(BOX_ID);
+  if (box) {
+    box.remove(); // Remove the box from the DOM
+  } else {
+    console.error("Box element not found");
+  }
+}
+
+// -----
+
+// UI FUNCTIONS
+
+function disconnect() {
+  removeBox();
+  header = "Enter room code from duogames.org!";
+  createBox(header, "join-room");
+  sendMsgToBackground({ message: "disconnect" });
+}
+
+async function joinRoom(room) {
+  const response = await sendMsgToBackground({ message: room });
+  removeBox();
+  console.log(response);
+  //todo @Euan: handle error if cannot join room, or service worker already handle existing session
+  header = `Joined room ${room}!`;
+  createBox(header, "leave-room");
+}
+
+// -----
