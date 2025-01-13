@@ -69,7 +69,10 @@ function connect() {
 
 function disconnect() {
   chrome.action.setIcon({ path: "icons/socket-inactive.png" }); // todo @euan remove
-  webSocket.disconnect();
+  console.log(webSocket);
+  if (webSocket) {
+    webSocket.disconnect();
+  }
   webSocket = null;
   tabId = null;
   ROOM_CODE = null;
@@ -122,6 +125,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
   if (tabId || ROOM_CODE) {
     console.log("Overriding existing sessions");
+    disconnect();
   }
 
   if (sender.tab) {
