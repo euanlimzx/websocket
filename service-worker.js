@@ -38,7 +38,11 @@ function connect() {
 
   webSocket.on("connect_error", (error) => {
     console.error("Connection error:", error);
-    //todo @Euan handle error
+    sendMessageToContentScript({
+      status: "ERROR",
+      message: "Unable to connect to server",
+    });
+    return;
   });
 
   webSocket.on("keep-alive", (message) => {
@@ -92,11 +96,11 @@ chrome.tabs.onRemoved.addListener((currTabId) => {
 });
 
 //todo @Euan temporarily removed this for now because its not purely triggering during refreshes, also triggers during other stuff
-// chrome.tabs.onUpdated.addListener((currTabId, changeInfo) => {
-//   if (currTabId == tabId) {
-//     disconnect();
-//   }
-// });
+chrome.tabs.onUpdated.addListener((currTabId, changeInfo) => {
+  if (currTabId == tabId && changeInfo.status == "complete") {
+    disconnect();
+  }
+});
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.message == "disconnect") {
@@ -104,23 +108,25 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     disconnect();
     return;
   }
-  //todo @Euan very hacky fix ^^
+
   if (tabId || ROOM_CODE) {
-    sendResponse({
-      message: "ERROR: Active session in another tab already exists",
-    });
-    return;
+    console.log("Overriding existing sessions");
   }
-  // need to do something if there is currently no input / room code is invalid
+
   if (sender.tab) {
     tabId = sender.tab.id;
-    console.log(tabId);
     ROOM_CODE = request.message;
     connect();
     keepAlive();
-    sendResponse({ message: `SUCCESS: Room ${request.message} Joined` });
+    sendResponse({
+      status: "SUCCESS",
+      message: `SUCCESS: Room ${request.message} Joined`,
+    });
   } else {
-    sendResponse({ message: "ERROR: no tab id detected" });
+    sendResponse({
+      status: "ERROR",
+      message: "Please close & re-open this tab and try again!",
+    });
   }
 });
 

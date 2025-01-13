@@ -15,6 +15,12 @@ if (
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.status && message.status == "ERROR") {
+    removeBox();
+    header = `Error: ${message.message}`;
+    createBox(header, "error");
+    return;
+  }
   const { keyCode, keyDir } = message;
   simulateKeyPress(keyDir, keyCode);
 });
@@ -291,6 +297,14 @@ function createBox(headerText, buttonFn) {
     whiteBox.appendChild(body);
     whiteBox.appendChild(action);
   } else {
+    const body = document.createElement("div");
+    body.id = "body";
+    body.innerText =
+      "Could you restart your browser & try again? \n\n Alternatively, contact duogames@gmail.com for assistance!";
+    body.style.fontSize = "14px";
+    body.style.marginBottom = "10px";
+    whiteBox.appendChild(header);
+    whiteBox.appendChild(body);
   }
   // Append the white box to the body of the document
   whiteBox.id = BOX_ID;
@@ -383,12 +397,18 @@ function disconnect() {
 }
 
 async function joinRoom(room) {
+  if (room.trim().length == 0) {
+    return;
+  }
   const response = await sendMsgToBackground({ message: room });
   removeBox();
-  console.log(response);
-  //todo @Euan: handle error if cannot join room, or service worker already handle existing session
-  header = `Joined room ${room}!`;
-  createBox(header, "leave-room");
+  if (response.status && response.status == "ERROR") {
+    header = `Error: ${response.message}`;
+    createBox(header, "error");
+  } else {
+    header = `Joined room ${room}!`;
+    createBox(header, "leave-room");
+  }
 }
 
 // -----
