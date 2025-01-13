@@ -54,6 +54,17 @@ function connect() {
     console.log("keystroke received!", keyEvent);
     sendMessageToContentScript(keyEvent);
   });
+
+  webSocket.on("room-status", (payload) => {
+    console.log(payload);
+    if (payload.userDisconnected) {
+      sendMessageToContentScript({
+        status: "ERROR",
+        message: "Other party has disconnected. Please join a new room!",
+      });
+      disconnect();
+    }
+  });
 }
 
 function disconnect() {

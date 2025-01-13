@@ -17,8 +17,8 @@ if (
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.status && message.status == "ERROR") {
     removeBox();
-    header = `Error: ${message.message}`;
-    createBox(header, "error");
+    header = `Error`;
+    createBox(header, "error", message.message);
     return;
   }
   const { keyCode, keyDir } = message;
@@ -167,7 +167,7 @@ function getKeyCode(keyName) {
 // UI
 
 // Function to update the content of the box
-function createBox(headerText, buttonFn) {
+function createBox(headerText, buttonFn, errorMsg = "") {
   // Create a container for the entire page (to ensure no default styles interfere)
   document.body.style.margin = 0;
   document.body.style.padding = 0;
@@ -299,8 +299,7 @@ function createBox(headerText, buttonFn) {
   } else {
     const body = document.createElement("div");
     body.id = "body";
-    body.innerText =
-      "Could you restart your browser & try again? \n\n Alternatively, contact duogames@gmail.com for assistance!";
+    body.innerText = `${errorMsg} \n\n Contact duogames@gmail.com for further assistance!`;
     body.style.fontSize = "14px";
     body.style.marginBottom = "10px";
     whiteBox.appendChild(header);
@@ -355,8 +354,8 @@ async function joinRoom(room) {
   const response = await sendMsgToBackground({ message: room });
   removeBox();
   if (response.status && response.status == "ERROR") {
-    header = `Error: ${response.message}`;
-    createBox(header, "error");
+    header = `Error`;
+    createBox(header, "error", response.message);
   } else {
     header = `Joined room ${room}!`;
     createBox(header, "leave-room");
