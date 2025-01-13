@@ -177,13 +177,13 @@ function createBox(headerText, buttonFn) {
   const toggleButton = document.createElement("button");
   toggleButton.style.position = "fixed";
   toggleButton.style.top = "10px";
-  toggleButton.style.right = "20px";
+  toggleButton.style.right = "10px";
   toggleButton.style.backgroundColor = "white"; // White background for the button
   toggleButton.style.color = "black"; // Black color for the icon
   toggleButton.style.border = "2px solid black"; // Black border for the button
   toggleButton.style.padding = "0"; // Remove padding to make it a perfect circle
-  toggleButton.style.width = "60px"; // Fixed size for the circle
-  toggleButton.style.height = "60px"; // Fixed size for the circle
+  toggleButton.style.width = "40px"; // Fixed size for the circle
+  toggleButton.style.height = "40px"; // Fixed size for the circle
   toggleButton.style.borderRadius = "50%"; // Make the button circular
   toggleButton.style.cursor = "pointer";
   toggleButton.style.zIndex = "1000"; // Ensure the button stays above the box
@@ -200,7 +200,7 @@ function createBox(headerText, buttonFn) {
   // Create the white box (it will be open by default)
   const whiteBox = document.createElement("div");
   whiteBox.style.position = "fixed";
-  whiteBox.style.top = "50px"; // Position the white box below the toggle button
+  whiteBox.style.top = "30px"; // Position the white box below the toggle button
   whiteBox.style.right = "20px";
   whiteBox.style.width = "300px";
   whiteBox.style.backgroundColor = "white";
@@ -326,54 +326,6 @@ function updateBoxContent(content) {
   const box = document.getElementById(BOX_NAME);
   box.innerHTML = "";
   box.innerHTML = content;
-}
-function oldCreateBox() {
-  // Create the outer container for the box
-  const box = document.createElement("div");
-  box.id = BOX_NAME;
-  box.style.width = "300px";
-  box.style.height = "200px";
-
-  box.style.backgroundColor = "white";
-  box.style.border = "1px solid black";
-  box.style.display = "flex";
-  box.style.borderRadius = "1rem";
-  box.style.flexDirection = "column";
-  box.style.alignItems = "center";
-  box.style.justifyContent = "center";
-  box.style.padding = "20px";
-
-  box.style.position = "fixed";
-  box.style.top = "10px";
-  box.style.right = "10px";
-  box.style.zIndex = 9999;
-
-  // Create the text input field
-  const input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = "Enter room code";
-  input.style.width = "80%";
-  input.style.padding = "8px";
-  input.style.marginBottom = "10px";
-
-  // Create the submit button
-  const submitButton = document.createElement("button");
-  submitButton.innerText = "Submit";
-  submitButton.style.padding = "8px 16px";
-  submitButton.style.cursor = "pointer";
-
-  // Add the input and submit button to the box
-  box.appendChild(input);
-  box.appendChild(submitButton);
-
-  // Append the box to the body
-  document.body.appendChild(box);
-
-  // Event listener for the submit button
-  submitButton.addEventListener("click", function () {
-    const room = input.value;
-    joinRoom(room);
-  });
 }
 
 function removeBox() {
