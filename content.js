@@ -1,6 +1,8 @@
 // CONSTS
 const TOGGLE_BUTTON_ID = "toggle-btn";
 const BOX_ID = "box-id";
+const singleLetterKeyRegex = new RegExp("^.$");
+const singleDigitKeyRegex = new RegExp("^d$");
 // ----
 
 // MAIN THREAD
@@ -47,12 +49,20 @@ function simulateKeyPress(keyPressDir, key) {
   //   //NOTE: Although keycode is deprecated, I removed some fields as they don't seem to be doing anything. Let's add them back only if we see value
   // });
   console.log(getKeyCode(key));
+  // const keyDownEvent = new KeyboardEvent(keyPressDir, {
+  //   key: key,
+  //   code: getCodeFromKey(key),
+  //   keyCode: getKeyCode(key),
+  //   bubbles: true, // Allow event bubbling
+  // });
   const keyDownEvent = new KeyboardEvent(keyPressDir, {
     key: key,
     code: getCodeFromKey(key),
     keyCode: getKeyCode(key),
+    which: getKeyCode(key),
     bubbles: true, // Allow event bubbling
   });
+  console.log("HEllo");
   console.log(keyDownEvent);
   canvasElement.dispatchEvent(keyDownEvent);
 }
@@ -60,8 +70,11 @@ function simulateKeyPress(keyPressDir, key) {
 function getCodeFromKey(keyName) {
   if (keyName === " ") {
     return "Space";
+  } else if (keyName.match(singleLetterKeyRegex)) {
+    return `Key${keyName.toUpperCase()}`;
+  } else if (keyName.match(singleDigitKeyRegex)) {
+    return `Digit${keyName}`;
   }
-
   return keyName;
 }
 
