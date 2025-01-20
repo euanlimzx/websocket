@@ -49,12 +49,20 @@ function simulateKeyPress(keyPressDir, key) {
   console.log(getKeyCode(key));
   const keyDownEvent = new KeyboardEvent(keyPressDir, {
     key: key,
-    code: key,
+    code: getCodeFromKey(key),
     keyCode: getKeyCode(key),
     bubbles: true, // Allow event bubbling
   });
   console.log(keyDownEvent);
   canvasElement.dispatchEvent(keyDownEvent);
+}
+
+function getCodeFromKey(keyName) {
+  if (keyName === " ") {
+    return "Space";
+  }
+
+  return keyName;
 }
 
 function getKeyCode(keyName) {
