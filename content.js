@@ -322,7 +322,7 @@ function createBox(headerText, buttonFn, errorMsg = "") {
   } else {
     const body = document.createElement("div");
     body.id = "body";
-    body.innerText = `${errorMsg} \n\n Contact duogames@gmail.com for further assistance!`;
+    body.innerText = `${errorMsg} \n\n Contact duogames.org@gmail.com for further assistance!`;
     body.style.fontSize = "14px";
     body.style.marginBottom = "10px";
     whiteBox.appendChild(header);
