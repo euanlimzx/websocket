@@ -4,7 +4,8 @@ let webSocket = null;
 let tabId = null;
 let ROOM_CODE = null;
 
-const DEV = true;
+const DEV = false;
+const LOCAL = false;
 
 async function sendMessageToContentScript(payload) {
   if (!tabId) {
@@ -16,13 +17,8 @@ async function sendMessageToContentScript(payload) {
 }
 
 function connect() {
-  DEV &&
-    console.log(
-      DEV ? "ws://localhost:3000" : "wss://socketio-server-do5e.onrender.com/"
-    );
-
   webSocket = io(
-    DEV ? "ws://localhost:3000" : "wss://socketio-server-do5e.onrender.com/",
+    LOCAL ? "ws://localhost:3000" : "wss://socketio-server-do5e.onrender.com/",
     {
       transports: ["websocket"],
     }
