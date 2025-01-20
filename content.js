@@ -48,6 +48,8 @@ function simulateKeyPress(keyPressDir, key) {
   // });
   console.log(getKeyCode(key));
   const keyDownEvent = new KeyboardEvent(keyPressDir, {
+    key: key,
+    code: key,
     keyCode: getKeyCode(key),
     bubbles: true, // Allow event bubbling
   });
@@ -66,7 +68,7 @@ function getKeyCode(keyName) {
     "Pause/Break": 19,
     "Caps Lock": 20,
     Esc: 27,
-    Space: 32,
+    " ": 32,
     "Page Up": 33,
     "Page Down": 34,
     End: 35,
