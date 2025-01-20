@@ -4,28 +4,25 @@ let webSocket = null;
 let tabId = null;
 let ROOM_CODE = null;
 
-const MODE = "";
+const DEV = true;
 
 async function sendMessageToContentScript(payload) {
   if (!tabId) {
-    console.log("ERROR: no tabId"); //todo @Euan handle accordingly
+    DEV && console.log("ERROR: no tabId"); //todo @Euan handle accordingly
     return;
   }
-  console.log("payload", payload);
+  DEV && console.log("payload", payload);
   await chrome.tabs.sendMessage(tabId, payload);
 }
 
 function connect() {
-  console.log(
-    MODE === "DEV"
-      ? "ws://localhost:3000"
-      : "wss://socketio-server-do5e.onrender.com/"
-  );
+  DEV &&
+    console.log(
+      DEV ? "ws://localhost:3000" : "wss://socketio-server-do5e.onrender.com/"
+    );
 
   webSocket = io(
-    MODE === "DEV"
-      ? "ws://localhost:3000"
-      : "wss://socketio-server-do5e.onrender.com/",
+    DEV ? "ws://localhost:3000" : "wss://socketio-server-do5e.onrender.com/",
     {
       transports: ["websocket"],
     }
@@ -47,17 +44,17 @@ function connect() {
   });
 
   webSocket.on("keep-alive", (message) => {
-    console.log("pong");
-    console.log("keep-alive!", message);
+    DEV && console.log("pong");
+    DEV && console.log("keep-alive!", message);
   });
 
   webSocket.on("keystroke", (keyEvent) => {
-    console.log("keystroke received!", keyEvent);
+    DEV && console.log("keystroke received!", keyEvent);
     sendMessageToContentScript(keyEvent);
   });
 
   webSocket.on("room-status", (payload) => {
-    console.log(payload);
+    DEV && console.log(payload);
     if (payload.userDisconnected) {
       sendMessageToContentScript({
         status: "ERROR",
@@ -71,7 +68,7 @@ function connect() {
 
 function disconnect() {
   chrome.action.setIcon({ path: "icons/socket-inactive.png" }); // todo @euan remove
-  console.log(webSocket);
+  DEV && console.log(webSocket);
   if (webSocket) {
     webSocket.disconnect();
   }
@@ -84,7 +81,7 @@ function keepAlive() {
   const keepAliveIntervalId = setInterval(
     () => {
       if (webSocket) {
-        console.log("ping");
+        DEV && console.log("ping");
         webSocket.emit("keep-alive", "ping", ROOM_CODE);
       } else {
         clearInterval(keepAliveIntervalId);
@@ -120,13 +117,13 @@ chrome.tabs.onUpdated.addListener((currTabId, changeInfo) => {
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.message == "disconnect") {
-    console.log("user triggered disconnect");
+    DEV && console.log("user triggered disconnect");
     disconnect();
     return;
   }
 
   if (tabId || ROOM_CODE) {
-    console.log("Overriding existing sessions");
+    DEV && console.log("Overriding existing sessions");
     disconnect();
   }
 

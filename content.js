@@ -3,6 +3,7 @@ const TOGGLE_BUTTON_ID = "toggle-btn";
 const BOX_ID = "box-id";
 const singleLetterKeyRegex = new RegExp("^.$");
 const singleDigitKeyRegex = new RegExp("^d$");
+const DEV = true;
 // ----
 
 // MAIN THREAD
@@ -48,7 +49,7 @@ function simulateKeyPress(keyPressDir, key) {
   //   bubbles: true, // Allow the event to propagate through the DOM
   //   //NOTE: Although keycode is deprecated, I removed some fields as they don't seem to be doing anything. Let's add them back only if we see value
   // });
-  console.log(getKeyCode(key));
+  DEV && console.log(getKeyCode(key));
   // const keyDownEvent = new KeyboardEvent(keyPressDir, {
   //   key: key,
   //   code: getCodeFromKey(key),
@@ -62,8 +63,7 @@ function simulateKeyPress(keyPressDir, key) {
     which: getKeyCode(key),
     bubbles: true, // Allow event bubbling
   });
-  console.log("HEllo");
-  console.log(keyDownEvent);
+  DEV && console.log(keyDownEvent);
   canvasElement.dispatchEvent(keyDownEvent);
 }
 

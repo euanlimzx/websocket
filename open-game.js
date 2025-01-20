@@ -21,9 +21,6 @@ function addPlayButton(gameFrameUrl) {
     playButtonContainer.style.display = "flex";
     playButtonContainer.style.flexDirection = "column";
     playButtonContainer.style.gap = "1rem";
-
-    console.log(playButtonContainer.style);
-
     const multiplayerButton = playButtonContainer
       .querySelector("#button-play")
       .cloneNode(true);
@@ -95,8 +92,6 @@ function main() {
   if (!gameFrameUrl) {
     return;
   }
-
-  console.log(gameFrameUrl);
 
   addPlayButton(gameFrameUrl);
 }
