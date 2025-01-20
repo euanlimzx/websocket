@@ -4,7 +4,7 @@ let webSocket = null;
 let tabId = null;
 let ROOM_CODE = null;
 
-const MODE = "DEV";
+const MODE = "";
 
 async function sendMessageToContentScript(payload) {
   if (!tabId) {
@@ -42,6 +42,7 @@ function connect() {
       status: "ERROR",
       message: "Unable to connect to server",
     });
+    disconnect();
     return;
   });
 
