@@ -220,6 +220,9 @@ function createBox(headerText, buttonFn, errorMsg = "") {
   toggleButton.id = TOGGLE_BUTTON_ID;
   document.body.appendChild(toggleButton);
 
+  // set the z-index so that the box is placed in front
+  toggleButton.style.zIndex = 1501
+
   // Create the white box (it will be open by default)
   const whiteBox = document.createElement("div");
   whiteBox.style.position = "fixed";
@@ -236,6 +239,9 @@ function createBox(headerText, buttonFn, errorMsg = "") {
 
   // Set text color in the white box to black
   whiteBox.style.color = "black";
+
+  // set the z-index so that the box is placed in front
+  whiteBox.style.zIndex = 1500
 
   // Create the header section inside the white box
   const header = document.createElement("div");
