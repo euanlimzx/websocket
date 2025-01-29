@@ -17,7 +17,7 @@ async function sendMessageToContentScript(payload) {
 }
 
 function connect() {
-  io = getWebSocket();
+  const io = getWebSocket();
   webSocket = io(
     LOCAL ? "ws://localhost:3000" : "wss://socketio-server-do5e.onrender.com/",
     {
