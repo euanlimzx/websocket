@@ -1,4 +1,4 @@
-import { io } from "https://cdn.jsdelivr.net/npm/socket.io-client@4.7.1/+esm";
+import getWebSocket from "./out.js";
 const TEN_SECONDS_MS = 10 * 1000;
 let webSocket = null;
 let tabId = null;
@@ -17,6 +17,7 @@ async function sendMessageToContentScript(payload) {
 }
 
 function connect() {
+  io = getWebSocket();
   webSocket = io(
     LOCAL ? "ws://localhost:3000" : "wss://socketio-server-do5e.onrender.com/",
     {
