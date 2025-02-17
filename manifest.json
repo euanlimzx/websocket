@@ -29,7 +29,7 @@
     },
     {
       "matches": ["https://www.twoplayergames.org/*"],
-      "js": ["open-game.js"],
+      "js": ["out.js", "open-game.js"],
       "all_frames": true
     }
   ]
